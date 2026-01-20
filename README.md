@@ -44,7 +44,7 @@ bridging the gap between HTTP-based Zero Trust auth and Kubernetes-native RBAC.
 
 ### Key Features
 
-  * **Identity Mapping:** Translates a Cloudflare Email (`alice@mydomain.com`) into a Kubernetes User (`alice`) and Groups (`system:masters`, `developers`).
+  * **Identity Mapping:** Translates enrolled Zero Trust user's email (e.g. `alice@mydomain.com`) into a Kubernetes User (e.g. `alice`) and Groups (e.g. `system:masters`, `developers`).
   * **Header Sanitization:** Removes dangerous headers to prevent spoofing and strips internal Cloudflare trace headers before they reach the cluster.
   * **WebSocket Support:** Full support for interactive `kubectl` commands (exec, attach, port-forward) by manually handling the WebSocket handshake and subprotocol negotiation.
   * **Security:** Verifies the JWT signature against your Team's JWKS to ensure requests are legitimate.
@@ -122,7 +122,7 @@ types are available locally.
 1.  **Navigate to the project root:**
 
     ```bash
-    cd k8s-proxy
+    cd kubernetes-access-worker-example
     ```
 
 2.  **Clean Install Dependencies:** Use `npm ci` (Clean Install) to ensure you
@@ -283,13 +283,13 @@ demo purposes. If you prefer to use an existing cluster (e.g., AWS EKS, GKE, or
 a local Minikube), you must manually update the Terraform configuration to
 bypass the infrastructure provisioning:
 
-1.  **Disable the Infrastructure Module:** Open `main.tf` and comment out the
+1.  **Disable the Infrastructure Module:** Open [`main.tf`](./terraform/main.tf) and comment out the
     entire `module "digitalocean" { ... }` block.
 2.  **Remove Dependencies:** In the `module "k8s"` block, remove the line
     `depends_on = [module.digitalocean]`.
-3. **Update Variables:** Open [`variables.tf`](./terraform/variables.tf). Remove
-   the `do_token` variable block.
-3.  **Update Providers:** Open [`providers.tf`](./terraform/providers.tf).
+3.  **Update Variables:** Open [`variables.tf`](./terraform/variables.tf). Remove
+    the `do_token` variable block.
+4.  **Update Providers:** Open [`providers.tf`](./terraform/providers.tf).
     Remove the `digitalocean` provider configuration and update the `kubernetes`
     provider to point to your local kubeconfig file (or specific cloud context).
 
@@ -309,7 +309,7 @@ provider "kubernetes" {
 
 By default, the Terraform module creates a basic Access Policy for the Worker.
 You must customize this to define exactly **who** in your organization is
-allowed to reach the Kubernetes API.
+allowed to reach the proxy worker and therefore the Kubernetes API.
 
 1.  **Locate the Resource:** Open
     [`terraform/modules/worker/main.tf`](./terraform/modules/worker/main.tf).
@@ -327,7 +327,7 @@ resource "cloudflare_zero_trust_access_policy" "policy" {
   # ... existing config ...
   decision = "allow"
 
-  include [
+  include = [
     { email = { email = "alice@mydomain.com" }},
     { email = { email = "bob@mydomain.com" }}
   ]
@@ -462,10 +462,10 @@ current-context: cf-context
 users:
 - name: warp-user
   user:
-    # No auth needed here; WARP handles the Session identity on 
-    # the network layer and the Worker maps your Access identity
+    # No auth needed here; WARP handles the Session identity at 
+    # the transport layer and the Worker maps your Access identity
     # to Kubernetes RBAC.
-    token: "" 
+    token: "unused"
 ```
 
 **The Authentication Flow:**

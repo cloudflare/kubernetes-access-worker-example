@@ -14,7 +14,7 @@ resource "kubernetes_namespace_v1" "cloudflared" {
 }
 
 resource "cloudflare_zero_trust_tunnel_cloudflared" "tunnel" {
-  account_id    = var.cloudflare_account_tag
+  account_id    = var.cloudflare_account_id
   name          = "${var.project_name}-${var.environment}-k8s-tunnel"
   config_src    = "local"
   tunnel_secret = var.cloudflare_tunnel_secret
@@ -29,7 +29,7 @@ resource "kubernetes_secret_v1" "cloudflared_creds" {
   }
   data = {
     "credentials.json" = jsonencode({
-      AccountTag   = var.cloudflare_account_tag
+      AccountTag   = var.cloudflare_account_id
       TunnelID     = cloudflare_zero_trust_tunnel_cloudflared.tunnel.id
       TunnelSecret = var.cloudflare_tunnel_secret
     })

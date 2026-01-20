@@ -3,8 +3,8 @@ variable "project_name" {
   type        = string
 }
 
-variable "cloudflare_account_tag" {
-  description = "Cloudflare account tag"
+variable "cloudflare_account_id" {
+  description = "Cloudflare account ID"
   type        = string
 }
 

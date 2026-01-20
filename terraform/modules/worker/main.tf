@@ -2,7 +2,7 @@
 data "cloudflare_zones" "search" {
   name = var.zone_name
   account = {
-    id = var.cloudflare_account_tag
+    id = var.cloudflare_account_id
   }
 }
 data "cloudflare_zone" "zone" {
@@ -11,7 +11,7 @@ data "cloudflare_zone" "zone" {
 
 # Associate custom domain to proxy worker
 resource "cloudflare_workers_custom_domain" "worker_domain" {
-  account_id = var.cloudflare_account_tag
+  account_id = var.cloudflare_account_id
   service    = var.worker_name
   hostname   = "${var.subdomain}.${var.zone_name}"
   zone_id    = data.cloudflare_zone.zone.id
@@ -24,12 +24,10 @@ resource "cloudflare_workers_custom_domain" "worker_domain" {
 
 # Create the Access Application to protect the worker
 resource "cloudflare_zero_trust_access_application" "worker_access_app" {
-  account_id = var.cloudflare_account_tag
-  name       = "Kube Proxy Worker"
-  type       = "self_hosted"
-  domain     = cloudflare_workers_custom_domain.worker_domain.hostname
-  # Does this override the global session duration for WARP sessions in "Login
-  # Methods" settings?
+  account_id       = var.cloudflare_account_id
+  name             = "Kube Proxy Worker"
+  type             = "self_hosted"
+  domain           = cloudflare_workers_custom_domain.worker_domain.hostname
   session_duration = "24h"
 
   policies = [{
@@ -46,7 +44,7 @@ resource "cloudflare_zero_trust_access_application" "worker_access_app" {
 
 # And a policy to grant access to it
 resource "cloudflare_zero_trust_access_policy" "policy" {
-  account_id       = var.cloudflare_account_tag
+  account_id       = var.cloudflare_account_id
   name             = "Kube Proxy Worker Policy"
   session_duration = "24h"
 
@@ -59,7 +57,7 @@ resource "cloudflare_zero_trust_access_policy" "policy" {
 }
 
 resource "cloudflare_connectivity_directory_service" "kube_wvpc_service" {
-  account_id = var.cloudflare_account_tag
+  account_id = var.cloudflare_account_id
   host = {
     hostname = "localhost"
     resolver_network = {

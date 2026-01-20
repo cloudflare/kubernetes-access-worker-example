@@ -4,8 +4,8 @@ variable "cloudflare_api_token" {
   sensitive   = true
 }
 
-variable "cloudflare_account_tag" {
-  description = "Cloudflare account tag"
+variable "cloudflare_account_id" {
+  description = "Cloudflare account ID"
   type        = string
 }
 
@@ -41,7 +41,7 @@ variable "region" {
 variable "cluster_version" {
   description = "Kubernetes version"
   type        = string
-  default     = "1.34.1-do.1"
+  default     = "latest"
 }
 
 variable "node_pool_size" {

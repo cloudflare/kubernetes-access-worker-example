@@ -698,7 +698,7 @@ function deleteHeader(headers: Headers, key: string): void {
  */
 function mapAccessIdentityToK8s(claims: AccessJwtClaims): K8sIdentity | null {
   // TODO: Remove this. This is for demo purposes. Gives everybody with
-  // cloudflare email in your Zero Trust org, superuser privileges
+  // @mydomain email in your Zero Trust org, superuser privileges
   if (claims.email.endsWith("@mydomain.com")) {
     return {
       accessJwtIdentity: claims.email,

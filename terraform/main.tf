@@ -35,7 +35,7 @@ resource "random_password" "random_bytes" {
 module "k8s" {
   source = "./modules/k8s"
 
-  cloudflare_account_tag   = var.cloudflare_account_tag
+  cloudflare_account_id    = var.cloudflare_account_id
   cloudflare_tunnel_secret = base64sha256(random_password.random_bytes.result)
   project_name             = var.project_name
   environment              = var.environment
@@ -46,9 +46,9 @@ module "k8s" {
 # Module to deploy Worker infrastructure, such as custom domain, Access policy,
 # WVPC bindings, etc.
 module "worker" {
-  source                 = "./modules/worker"
-  subdomain              = var.subdomain
-  zone_name              = var.zone_name
-  cloudflare_account_tag = var.cloudflare_account_tag
-  tunnel_id              = module.k8s.tunnel_id
+  source                = "./modules/worker"
+  subdomain             = var.subdomain
+  zone_name             = var.zone_name
+  cloudflare_account_id = var.cloudflare_account_id
+  tunnel_id             = module.k8s.tunnel_id
 }
